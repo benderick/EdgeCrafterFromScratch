@@ -1,5 +1,3 @@
-from engine.core.workspace import register
-
 @register
 class Meta:
     def __init__(self, author: str, exp_name: str, description: str = ""):

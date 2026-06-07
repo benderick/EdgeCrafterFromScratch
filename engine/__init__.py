@@ -1,5 +1,6 @@
 import os
 import importlib
+import builtins
 
 def auto_import_recursive(pkg_path, pkg_name):
     """
@@ -12,7 +13,8 @@ def auto_import_recursive(pkg_path, pkg_name):
 
         # 如果是目录 → 递归进去
         if os.path.isdir(file_path):
-            auto_import_recursive(file_path, f"{pkg_name}.{filename}")
+            if "__pycache__" not in file_path:
+                auto_import_recursive(file_path, f"{pkg_name}.{filename}")
 
         # 如果是 py 文件，且不是 __init__.py → 导入执行
         elif filename.endswith(".py") and filename != "__init__.py":
@@ -23,6 +25,11 @@ def auto_import_recursive(pkg_path, pkg_name):
             except Exception as e:
                 print(f"[自动导入警告] 导入失败: {pkg_name}.{module_name}, {e}")
 
+# 将register挂载到内置命名空间，使用时无需导入
+from engine.core.workspace import register
+builtins.register = register # type: ignore
+from engine.utils.log import console
 # 入口：从当前包开始递归
 current_dir = os.path.dirname(__file__)
-auto_import_recursive(current_dir, __name__)
+with console.status("正在进行全局注册表注册...", spinner="bouncingBall"):
+    auto_import_recursive(current_dir, __name__)
