@@ -2,7 +2,7 @@ import os
 from PIL import Image
 import torch
 from pycocotools.coco import COCO
-from engine.data.datasets.detection._parser import BaseParser
+from engine.data.parsers._parser import BaseParser
 
 @register
 class COCOParser(BaseParser):

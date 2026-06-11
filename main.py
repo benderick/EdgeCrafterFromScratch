@@ -40,10 +40,13 @@ def main(cfg: DictConfig) -> None:
     # log.panel(sys.path, "导包列表")
     # log.panel(sys.modules, "模块缓存")
     log.panel(REGISTRY, "注册表内容")
-    log.panel(OmegaConf.to_container(cfg), "配置内容")
+    # log.panel(OmegaConf.to_container(cfg), "配置内容")
     
-    exp = OmegaExpConfig(cfg.exp) 
-    log.panel(exp.dataset[100])
-    
+    exp = OmegaExpConfig(cfg.exp)
+    dl = exp.dataloader
+    for images, targets in dl:
+        log.info(images.shape)
+        log.panel(targets)
+        break    
 if __name__ == "__main__":
     main()

@@ -1,8 +1,9 @@
 from engine.core._config import ExpConfig
 from engine.core.workspace import REGISTRY
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import DictConfig, ListConfig, OmegaConf
 from hydra.utils import instantiate
 from engine.utils import log
+import torchvision
 
 
 class OmegaExpConfig(ExpConfig):
@@ -38,16 +39,18 @@ class OmegaExpConfig(ExpConfig):
         方便之后的动态实例化。
         要求
         """
-        for key, value in cfg.items():            
-            if isinstance(value, DictConfig):
-                self._target_cfg(value) # 递归检查子配置
-                if '_target_' in value: 
-                    # 如果是待实例化字段，获取其完整模块路径并更新_target_
-                    # 如果待实例化字段值未注册，抛出断言错误
-                    info = REGISTRY.get(value['_target_'], None)
-                    assert info is not None, f"{value['_target_']} 未在全局注册表中注册"
-                    if isinstance(info, dict) and '_pymodule' in info:
-                        pymodule = info['_pymodule']
-                        value["_target_"] = pymodule
-                    else:
-                        value["_target_"] = info
+        if isinstance(cfg, DictConfig):
+            if "_target_" in cfg:
+                # 如果是待实例化字段，获取其完整模块路径并更新_target_
+                # 如果待实例化字段值未注册，抛出断言错误
+                info = REGISTRY.get(cfg["_target_"], None)
+                assert info is not None, f"{cfg['_target_']} 未在全局注册表中注册"
+                if isinstance(info, dict) and "_pymodule" in info:
+                    cfg["_target_"] = info["_pymodule"]
+                else:
+                    cfg["_target_"] = info
+            for value in cfg.values():
+                self._target_cfg(value)
+        elif isinstance(cfg, ListConfig):
+            for item in cfg:
+                self._target_cfg(item)

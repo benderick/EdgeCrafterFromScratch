@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 import torch
 from PIL import Image
-from engine.data.datasets.detection._parser import BaseParser
+from engine.data.parsers._parser import BaseParser
 
 @register
 class YOLOParser(BaseParser):

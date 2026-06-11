@@ -1,6 +1,9 @@
+from typing import Union
+
 from engine.core.meta import Meta
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, DataLoader
 class ExpConfig(object):
     def __init__(self):
-        self.meta : Meta|None  = None
-        self.dataset : Dataset|None = None
+        self.meta : Union[Meta,None]  = None
+        # self.dataset : Union[Dataset,None] = None
+        self.dataloader : Union[DataLoader,None] = None

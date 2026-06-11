@@ -16,13 +16,33 @@ exp:
     author: ZhangShuo
     exp_name: test3.1
     description: 用于测试
+  dataloader:
+    _target_: DataLoader
+    dataset:
+      _target_: DetectionDataset
+      parser:
+        _target_: COCOParser
+        img_dir: data/coco128_coco/train2017
+        ann_file: data/coco128_coco/annotations/train2017.json
+      transforms:
+        _target_: Compose
+        ops:
+          - {_target_: ToBoundingBoxes}
+          - {_target_: RandomPhotometricDistort, p: 0.5}
+          - {_target_: RandomHorizontalFlip}
+          - {_target_: Resize, size: [640, 640]}
+          - {_target_: SanitizeBoundingBoxes, min_size: 1}
+          - {_target_: ConvertImage, fmt: 'tensor', mode: 'normalize', mean: [0.485, 0.456, 0.406], std: [0.229, 0.224, 0.225]}
+          # - {_target_: ConvertImage, fmt: 'pil', mode: 'denormalize', mean: [0.485, 0.456, 0.406], std: [0.229, 0.224, 0.225]}
+          - {_target_: ToTensorBoxes}
+          - {_target_: ConvertBoxes, in_fmt: 'xyxy', out_fmt: 'cxcywh', mode: "normalize"}
+    collate_fn:
+      _target_: DetectionCollateFn
+    shuffle: True
+    batch_size: 8 # 每块GPU的
+    num_workers: 4
 
-  dataset:
-    _target_: DetectionDataset
-    parser:
-      _target_: COCOParser
-      img_dir: data/coco128_coco/train2017
-      ann_file: data/coco128_coco/annotations/train2017.json
+        # - {_target_: Resize, size: [640, 640], }
     # parser:
     #   _target_: YOLOParser
     #   img_dir: data/coco128_yolo/images/train2017
